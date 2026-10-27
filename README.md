@@ -89,7 +89,6 @@ python creepypasta_pipeline.py "история про подростка 15 ле
 
 | Файл | Описание |
 |------|----------|
-| `concept.txt` | Концепция истории |
 | `title.txt` | Название (1-2 слова) |
 | `hashtags_part1.txt` | Хештеги для части 1 |
 | `hashtags_part2.txt` | Хештеги для части 2 |
@@ -138,7 +137,6 @@ python creepypasta_pipeline.py "история про подростка 15 ле
 ├── music/                  # Фоновая музыка (MP3)
 └── stories/                # Сгенерированный контент (не в git)
     └── 001_название/
-        ├── concept.txt
         ├── title.txt
         ├── hashtags_part1.txt
         ├── hashtags_part2.txt

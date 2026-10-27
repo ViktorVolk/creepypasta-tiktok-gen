@@ -54,40 +54,13 @@ async def generate_topic() -> str:
 
 Требования:
 - 1-2 предложения с описанием темы
-- Неожиданное сочетание обычных и пугающих элементов
 - Избегай клише (заброшенные больницы, темные леса)
-- Должно быть что-то необычное, странное
 - НЕ пиши префикс "Тема:" в ответе
-
-Примеры:
-- "Детские рисунки, которые предсказывают будущее"
-- "Старый радиоприемник, который ловит передачи из параллельного мира"
-- "Сосед, который никогда не выходит из дома, но его окна меняются каждую ночь"
 
 Ответ (без префикса "Тема:"):"""
     result = qwen_request(prompt, max_tokens=100, temperature=0.95)
     result = result.replace("Тема:", "").replace("тема:", "").strip()
     return result
-
-
-async def generate_concept(topic: str) -> str:
-    prompt = f"""Создай концепцию для хоррор-рассказа (крипипасты) на русском языке.
-
-ТЕМА/ПОЖЕЛАНИЯ:
-{topic}
-
-ВАЖНО: Если в теме указаны конкретные детали (персонажи, место, события, атмосфера) - обязательно используй их в концепции.
-
-Опиши кратко (5-7 предложений):
-- О ком история (главный герой: возраст, обстоятельства)
-- Где происходит действие (место, атмосфера)
-- Когда происходит (время: детство, юность, недавние события)
-- Что за ужас (существо, явление, проклятие)
-- Неожиданный финал или загадочная развязка
-- Предвестники беды (странные знаки перед событиями)
-
-Концепция:"""
-    return qwen_request(prompt, max_tokens=400, temperature=0.85)
 
 
 async def generate_title(topic: str) -> str:
@@ -107,14 +80,11 @@ async def generate_title(topic: str) -> str:
     return qwen_request(prompt, max_tokens=20, temperature=0.9)
 
 
-async def generate_hashtags(concept: str, topic: str) -> str:
-    prompt = f"""На основе концепции и темы хоррор-рассказа подбери 7-8 популярных хештегов для TikTok.
+async def generate_hashtags(topic: str) -> str:
+    prompt = f"""Подбери 7-8 популярных хештегов для TikTok на основе темы хоррор-рассказа.
 
-ТЕМА/ПОЖЕЛАНИЯ:
+ТЕМА:
 {topic}
-
-КОНЦЕПЦИЯ:
-{concept}
 
 Требования:
 - Формат: #хештег через пробел
@@ -126,50 +96,21 @@ async def generate_hashtags(concept: str, topic: str) -> str:
     return qwen_request(prompt, max_tokens=200, temperature=0.7)
 
 
-async def generate_story(concept: str, topic: str) -> str:
-    intro_prompt = """Придумай начало для хоррор-рассказа (только одну фразу). Примеры:
-- "Эта история произошла со мной, когда..."
-- "Бабушка рассказывала мне, что..."
-- "Дядя поведал мне жуткую историю о..."
-- "Я никогда не рассказывал никому, но..."
-- "Всё началось с того, что..."
-- "До сих пор не понимаю, что тогда произошло..."
-- "Мне было лет 10, когда..."
-
-Напиши ТОЛЬКО одно начало (одну фразу), без продолжения:"""
-
-    intro = qwen_request(intro_prompt, max_tokens=50, temperature=0.9)
-
+async def generate_story(topic: str) -> str:
     prompt = f"""Напиши хоррор-рассказ (крипипасту) для озвучки на 6 минут.
 
-ТЕМА/ПОЖЕЛАНИЯ:
+ТЕМА:
 {topic}
-
-КОНЦЕПЦИЯ ИСТОРИИ:
-{concept}
-
-ВАЖНО: Если в теме указаны конкретные детали (персонажи, место, события) - используй их, но не перегружай рассказ.
 
 СТИЛЬ ПОВЕСТВОВАНИЯ:
 - Пиши ПРОСТЫМ, РАЗГОВОРНЫМ языком, как будто рассказываешь другу
-- НЕ перечисляй много деталей подряд - выбери 2-3 самых важных
-- Пиши живо, эмоционально, с паузами для дыхания
+- Пиши живо, эмоционально
 - Запрещено: "следует отметить", "необходимо упомянуть", "стоит добавить"
-
-СТРУКТУРА РАССКАЗА:
-1. НАЧАЛО (около 100 слов): Начни с фразы "{intro}". Кратко представь героя и место. Без лишних деталей.
-
-2. РАЗВИТИЕ (около 200 слов): Опиши ОДНО-ДВА странных события. Не пытайся описать всё сразу. Дай читателю время осознать.
-
-3. КУЛЬМИНАЦИЯ (около 200 слов): Опиши ГЛАВНОЕ страшное событие. Фокусируйся на одном эпизоде, а не на серии событий.
-
-4. КОНЦОВКА (около 100 слов): Заверши историю. Финал должен быть ЗАВЕРШЁННЫМ, но с лёгкой недосказанностью. Не обрывай на полуслове.
 
 ТРЕБОВАНИЯ:
 - ОКОЛО 550-650 слов
-- От ПЕРВОГО ЛИЦА (я, мне, мой)
+- От ПЕРВОГО ЛИЦА
 - Естественный разговорный стиль
-- Минимум деталей, максимум атмосферы
 
 Рассказ:"""
     return qwen_request(prompt, max_tokens=2400, temperature=0.85)
@@ -182,25 +123,16 @@ async def generate_voice(text: str, output_file: str):
     print(f"   Голос сохранен: {output_file}")
 
 
-async def generate_image_prompt(story: str, concept: str, topic: str) -> str:
-    prompt = f"""Создай описание для генерации изображения на основе рассказа.
-
-ТЕМА/ПОЖЕЛАНИЯ:
-{topic}
+async def generate_image_prompt(story: str, topic: str) -> str:
+    prompt = f"""Создай описание для генерации изображения которое будет обложкой рассказа.
 
 РАССКАЗ:
 {story}
 
-КОНЦЕПЦИЯ:
-{concept}
-
-ВАЖНО: Если в теме указаны конкретные визуальные детали - обязательно используй их.
-
 Создай промпт для SDXL на английском языке (100-150 слов):
 - Опиши ГЛАВНОЕ МЕСТО действия из рассказа (дом, лес, больница и т.д.)
 - Опиши АТМОСФЕРУ (темнота, туман, заброшенность, жуткое освещение)
-- Опиши ГЛАВНЫЙ УЖАС/МОНСТРА/АНОМАЛИЮ, но как ЭЛЕМЕНТ ИНТЕРЬЕРА/ПЕЙЗАЖА
-- Монстр НЕ ДОЛЖЕН быть в центре внимания, он должен быть СКРЫТ в тенях, за углом, в отражении
+- Опиши ГЛАВНЫЙ УЖАС/МОНСТРА/АНОМАЛИЮ, на фото оно должно выглядеть жутко и уродливо.
 - Добавь детали: тени, силуэты, странные формы на заднем плане
 - Стиль: photorealistic, horror, cinematic lighting, dark atmosphere, eerie
 - ВАЖНО: вертикальная композиция (portrait orientation), объект съёмки в центре кадра
@@ -504,19 +436,13 @@ async def main():
     print(f"Тема: {topic}")
     print(f"Папка: {story_dir}\n")
 
-    print("1. Параллельная генерация концепции, названия и хештегов...")
-    concept_task = generate_concept(topic)
+    print("1. Параллельная генерация названия и хештегов...")
     title_task = generate_title(topic)
-    concept_result, title = await asyncio.gather(concept_task, title_task)
-    concept = concept_result
+    hashtags_task = generate_hashtags(topic)
+    title, hashtags = await asyncio.gather(title_task, hashtags_task)
 
-    (story_dir / "concept.txt").write_text(concept, encoding="utf-8")
     (story_dir / "title.txt").write_text(title, encoding="utf-8")
     print(f"   Название: {title}")
-    print(f"   Концепция: {concept[:100]}...\n")
-
-    print("2. Генерация хештегов...")
-    hashtags = await generate_hashtags(concept, topic)
     
     hashtags_part1 = f"{title} #1 {hashtags}"
     hashtags_part2 = f"{title} #2 {hashtags}"
@@ -527,13 +453,13 @@ async def main():
     (story_dir / "hashtags_part3.txt").write_text(hashtags_part3, encoding="utf-8")
     print(f"   Хештеги: {hashtags}\n")
 
-    print("3. Генерация рассказа...")
-    story = await generate_story(concept, topic)
+    print("2. Генерация рассказа...")
+    story = await generate_story(topic)
     (story_dir / "story.txt").write_text(story, encoding="utf-8")
     word_count = len(story.split())
     print(f"   Рассказ: {word_count} слов\n")
 
-    print("4. Разделение на 3 части...")
+    print("3. Разделение на 3 части...")
     part1, part2, part3 = split_story(story)
     (story_dir / "story_part1.txt").write_text(part1, encoding="utf-8")
     (story_dir / "story_part2.txt").write_text(part2, encoding="utf-8")
@@ -542,23 +468,23 @@ async def main():
     print(f"   Часть 2: {len(part2.split())} слов")
     print(f"   Часть 3: {len(part3.split())} слов\n")
 
-    print("5. Параллельная генерация озвучки и промпта изображения...")
+    print("4. Параллельная генерация озвучки и промпта изображения...")
     voice1_path = str(story_dir / "voice_part1.mp3")
     voice2_path = str(story_dir / "voice_part2.mp3")
     voice3_path = str(story_dir / "voice_part3.mp3")
     voice1_task = generate_voice(part1, voice1_path)
     voice2_task = generate_voice(part2, voice2_path)
     voice3_task = generate_voice(part3, voice3_path)
-    image_prompt_task = generate_image_prompt(story, concept, topic)
+    image_prompt_task = generate_image_prompt(story, topic)
     _, _, _, image_prompt = await asyncio.gather(voice1_task, voice2_task, voice3_task, image_prompt_task)
     (story_dir / "image_prompt.txt").write_text(image_prompt, encoding="utf-8")
     print(f"   Промпт: {image_prompt[:80]}...\n")
 
-    print("6. Генерация изображения...")
+    print("5. Генерация изображения...")
     image_path = await generate_image(image_prompt, story_dir)
     print(f"   Изображение: {image_path}\n")
 
-    print("7. Создание обложек...")
+    print("6. Создание обложек...")
     cover1_path = str(story_dir / "cover_part1.png")
     cover2_path = str(story_dir / "cover_part2.png")
     cover3_path = str(story_dir / "cover_part3.png")
@@ -567,7 +493,7 @@ async def main():
     create_cover(image_path, title, 3, cover3_path)
     print()
 
-    print("8. Создание видео...")
+    print("7. Создание видео...")
     video1_path = str(story_dir / "video_part1.mp4")
     video2_path = str(story_dir / "video_part2.mp4")
     video3_path = str(story_dir / "video_part3.mp4")
