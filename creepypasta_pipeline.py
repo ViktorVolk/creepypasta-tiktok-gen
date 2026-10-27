@@ -77,7 +77,17 @@ async def generate_title(topic: str) -> str:
 - БЕЗ кавычек, без пояснений, ТОЛЬКО название
 
 Название:"""
-    return qwen_request(prompt, max_tokens=20, temperature=0.9)
+    result = qwen_request(prompt, max_tokens=20, temperature=0.9)
+    
+    # Очистка результата
+    result = result.replace('"', '').replace("'", '').replace('«', '').replace('»', '').strip()
+    result = result.replace('Название:', '').replace('название:', '').strip()
+    
+    # Если пусто - используем тему
+    if not result:
+        result = topic[:10]
+    
+    return result
 
 
 async def generate_hashtags(topic: str) -> str:
@@ -134,12 +144,12 @@ async def generate_voice(text: str, output_file: str):
 
 
 async def generate_image_prompt(story: str, topic: str) -> str:
-    prompt = f"""Создай описание для генерации изображения которое будет обложкой рассказа.
+    prompt = f"""Создай описание для генерации изображения по теме рассказа.
 
 РАССКАЗ:
 {story}
 
-Создай промпт для SDXL на английском языке (100-150 слов):
+Создай промпт для SDXL на английском языке (50 слов):
 - Опиши ГЛАВНОЕ МЕСТО действия из рассказа (дом, лес, больница и т.д.)
 - Опиши АТМОСФЕРУ (темнота, туман, заброшенность, жуткое освещение)
 - Опиши ГЛАВНЫЙ УЖАС/МОНСТРА/АНОМАЛИЮ, на фото оно должно выглядеть жутко и уродливо
