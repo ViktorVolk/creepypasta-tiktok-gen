@@ -1,0 +1,43 @@
+# Environment variables
+.env
+
+# Generated content
+stories/
+output/
+
+# AI tools (separate projects)
+ComfyUI/
+Fooocus/
+stable-diffusion-webui/
+
+# Music files
+music/
+
+# Old test files
+download_models.py
+generate_video.py
+test_voice.py
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
