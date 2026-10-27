@@ -355,29 +355,29 @@ def create_video(image_path: str, audio_path: str, output_path: str, effect: str
     effect_filters = {
         "vhs_glitch": (
             "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-            "noise=alls=40:allf=t+u,"
-            "eq=contrast=1.2:brightness=-0.08:saturation=1.4,"
-            "hue=h=3*t:enable='between(mod(t\\,0.3)\\,0\\,0.08)'"
+            "noise=alls=28:allf=t+u,"
+            "eq=contrast=1.14:brightness=-0.06:saturation=1.34,"
+            "hue=h=1.2*t:enable='between(mod(t\\,0.3)\\,0\\,0.03)'"
         ),
         "film_grain": (
             "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-            "noise=alls=50:allf=t,"
-            "eq=contrast=1.25:brightness=-0.05:saturation=0.85"
+            "noise=alls=38:allf=t,"
+            "eq=contrast=1.19:brightness=-0.04:saturation=0.88"
         ),
         "static_noise": (
             "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-            "noise=alls=70:allf=t+u,"
-            "eq=contrast=1.3:brightness=-0.1:saturation=0.6"
+            "noise=alls=58:allf=t+u,"
+            "eq=contrast=1.24:brightness=-0.09:saturation=0.66"
         ),
         "scan_lines": (
             "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-            "eq=contrast=1.2:brightness=-0.08,"
-            "noise=alls=25:allf=t"
+            "eq=contrast=1.14:brightness=-0.06,"
+            "noise=alls=10:allf=t"
         ),
         "datamosh": (
             "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-            "noise=alls=35:allf=t,"
-            "eq=contrast=1.2:brightness=-0.06:saturation=1.3"
+            "noise=alls=23:allf=t,"
+            "eq=contrast=1.14:brightness=-0.05:saturation=1.24"
         ),
     }
 
