@@ -140,7 +140,7 @@ async def generate_story(concept: str, topic: str) -> str:
 
     intro = qwen_request(intro_prompt, max_tokens=50, temperature=0.9)
 
-    prompt = f"""Напиши хоррор-рассказ (крипипасту) для озвучки на 3.5 минуты.
+    prompt = f"""Напиши хоррор-рассказ (крипипасту) для озвучки на 6 минут.
 
 ТЕМА/ПОЖЕЛАНИЯ:
 {topic}
@@ -148,23 +148,33 @@ async def generate_story(concept: str, topic: str) -> str:
 КОНЦЕПЦИЯ ИСТОРИИ:
 {concept}
 
-ВАЖНО: Если в теме указаны конкретные детали (персонажи, место, события, атмосфера) - обязательно используй их в рассказе.
+ВАЖНО: Если в теме указаны конкретные детали (персонажи, место, события) - используй их, но не перегружай рассказ.
 
-ТРЕБОВАНИЯ К РАССКАЗУ:
-1. НАЧНИ С ФРАЗЫ: "{intro}" (продолжи историю от этой фразы)
-2. СТРОГО 500-550 слов (для длительности 3.5 минуты)
-3. Структура рассказа:
-   - Вступление: знакомство с героем и местом (40-60 слов)
-   - Предвестники беды: странные знаки, необъяснимые события (80-100 слов)
-   - Нарастание ужаса: описание аномалии/существа (120-140 слов)
-   - Кульминация: столкновение с ужасом (80-100 слов)
-   - Загадочный финал: намек на плохой исход, незавершенность (40-60 слов)
-4. КРИТИЧЕСКИ ВАЖНО: Рассказ ДОЛЖЕН вестись СТРОГО ОТ ПЕРВОГО ЛИЦА (я, мне, мой, меня, я видел, я слышал, я почувствовал)
-5. Используй детали: звуки, запахи, ощущения
-6. Финал должен оставлять чувство тревоги и недосказанности
+СТИЛЬ ПОВЕСТВОВАНИЯ:
+- Пиши ПРОСТЫМ, РАЗГОВОРНЫМ языком, как будто рассказываешь другу
+- Используй КОРОТКИЕ предложения (10-15 слов максимум)
+- Избегай сложных конструкций, деепричастных оборотов, канцеляризмов
+- НЕ перечисляй много деталей подряд - выбери 2-3 самых важных
+- Пиши живо, эмоционально, с паузами для дыхания
+- Запрещено: "следует отметить", "необходимо упомянуть", "стоит добавить"
+
+СТРУКТУРА РАССКАЗА:
+1. НАЧАЛО (150 слов): Начни с фразы "{intro}". Кратко представь героя и место. Без лишних деталей.
+
+2. РАЗВИТИЕ (250 слов): Опиши ОДНО-ДВА странных события. Не пытайся описать всё сразу. Дай читателю время осознать.
+
+3. КУЛЬМИНАЦИЯ (250 слов): Опиши ГЛАВНОЕ страшное событие. Фокусируйся на одном эпизоде, а не на серии событий.
+
+4. КОНЦОВКА (150 слов): Заверши историю. Финал должен быть ЗАВЕРШЁННЫМ, но с лёгкой недосказанностью. Не обрывай на полуслове.
+
+ТРЕБОВАНИЯ:
+- СТРОГО 800-850 слов
+- От ПЕРВОГО ЛИЦА (я, мне, мой)
+- Естественный разговорный стиль
+- Минимум деталей, максимум атмосферы
 
 Рассказ:"""
-    return qwen_request(prompt, max_tokens=1600, temperature=0.85)
+    return qwen_request(prompt, max_tokens=2400, temperature=0.85)
 
 
 async def generate_voice(text: str, output_file: str):
@@ -267,46 +277,87 @@ async def generate_image(prompt: str, output_dir: Path) -> str:
         waited += 2
     return None
 def split_story(story: str):
+    """Разделяет рассказ на 3 равные части"""
     paragraphs = [p.strip() for p in story.split('\n') if p.strip()]
     
-    if len(paragraphs) < 2:
-        sentences = story.split('. ')
-        mid = len(sentences) // 2
-        for i in range(mid, len(sentences)):
-            if sentences[i].strip().endswith(('.', '!', '?')):
-                mid = i + 1
-                break
-        part1 = '. '.join(sentences[:mid])
-        part2 = '. '.join(sentences[mid:])
-    else:
-        mid = len(paragraphs) // 2
-        for i in range(mid, len(paragraphs)):
+    # Сначала пытаемся разделить по абзацам
+    if len(paragraphs) >= 3:
+        third = len(paragraphs) // 3
+        
+        # Находим границы для первой трети
+        mid1 = third
+        for i in range(mid1, len(paragraphs)):
             if paragraphs[i].strip().endswith(('.', '!', '?')):
-                mid = i + 1
+                mid1 = i + 1
                 break
-        part1 = '\n\n'.join(paragraphs[:mid])
-        part2 = '\n\n'.join(paragraphs[mid:])
+        
+        # Находим границы для второй трети
+        mid2 = 2 * third
+        for i in range(mid2, len(paragraphs)):
+            if paragraphs[i].strip().endswith(('.', '!', '?')):
+                mid2 = i + 1
+                break
+        
+        part1 = '\n\n'.join(paragraphs[:mid1])
+        part2 = '\n\n'.join(paragraphs[mid1:mid2])
+        part3 = '\n\n'.join(paragraphs[mid2:])
+    else:
+        # Если мало абзацев, делим по предложениям
+        sentences = story.split('. ')
+        third = len(sentences) // 3
+        
+        mid1 = third
+        for i in range(mid1, len(sentences)):
+            if sentences[i].strip().endswith(('.', '!', '?')):
+                mid1 = i + 1
+                break
+        
+        mid2 = 2 * third
+        for i in range(mid2, len(sentences)):
+            if sentences[i].strip().endswith(('.', '!', '?')):
+                mid2 = i + 1
+                break
+        
+        part1 = '. '.join(sentences[:mid1])
+        part2 = '. '.join(sentences[mid1:mid2])
+        part3 = '. '.join(sentences[mid2:])
     
+    # Проверяем баланс частей
     part1_words = len(part1.split())
     part2_words = len(part2.split())
-    total_words = part1_words + part2_words
+    part3_words = len(part3.split())
+    total_words = part1_words + part2_words + part3_words
     
     if total_words > 0:
-        ratio = abs(part1_words - part2_words) / max(part1_words, part2_words)
+        # Проверяем разницу между самой большой и самой маленькой частью
+        max_words = max(part1_words, part2_words, part3_words)
+        min_words = min(part1_words, part2_words, part3_words)
+        ratio = (max_words - min_words) / max_words
         
+        # Если разница больше 20%, делим по словам
         if ratio > 0.2:
             words = story.split()
-            mid_word = len(words) // 2
+            third_word = len(words) // 3
             
-            for i in range(mid_word, len(words)):
+            # Находим первую границу
+            mid1_word = third_word
+            for i in range(mid1_word, len(words)):
                 if words[i].endswith(('.', '!', '?')):
-                    mid_word = i + 1
+                    mid1_word = i + 1
                     break
             
-            part1 = ' '.join(words[:mid_word])
-            part2 = ' '.join(words[mid_word:])
+            # Находим вторую границу
+            mid2_word = 2 * third_word
+            for i in range(mid2_word, len(words)):
+                if words[i].endswith(('.', '!', '?')):
+                    mid2_word = i + 1
+                    break
+            
+            part1 = ' '.join(words[:mid1_word])
+            part2 = ' '.join(words[mid1_word:mid2_word])
+            part3 = ' '.join(words[mid2_word:])
     
-    return part1, part2
+    return part1, part2, part3
 
 
 def create_cover(image_path: str, title: str, part_num: int, output_path: str):
@@ -471,9 +522,11 @@ async def main():
     
     hashtags_part1 = f"{title} #1 {hashtags}"
     hashtags_part2 = f"{title} #2 {hashtags}"
+    hashtags_part3 = f"{title} #3 {hashtags}"
     
     (story_dir / "hashtags_part1.txt").write_text(hashtags_part1, encoding="utf-8")
     (story_dir / "hashtags_part2.txt").write_text(hashtags_part2, encoding="utf-8")
+    (story_dir / "hashtags_part3.txt").write_text(hashtags_part3, encoding="utf-8")
     print(f"   Хештеги: {hashtags}\n")
 
     print("3. Генерация рассказа...")
@@ -482,20 +535,24 @@ async def main():
     word_count = len(story.split())
     print(f"   Рассказ: {word_count} слов\n")
 
-    print("4. Разделение на 2 части...")
-    part1, part2 = split_story(story)
+    print("4. Разделение на 3 части...")
+    part1, part2, part3 = split_story(story)
     (story_dir / "story_part1.txt").write_text(part1, encoding="utf-8")
     (story_dir / "story_part2.txt").write_text(part2, encoding="utf-8")
+    (story_dir / "story_part3.txt").write_text(part3, encoding="utf-8")
     print(f"   Часть 1: {len(part1.split())} слов")
-    print(f"   Часть 2: {len(part2.split())} слов\n")
+    print(f"   Часть 2: {len(part2.split())} слов")
+    print(f"   Часть 3: {len(part3.split())} слов\n")
 
     print("5. Параллельная генерация озвучки и промпта изображения...")
     voice1_path = str(story_dir / "voice_part1.mp3")
     voice2_path = str(story_dir / "voice_part2.mp3")
+    voice3_path = str(story_dir / "voice_part3.mp3")
     voice1_task = generate_voice(part1, voice1_path)
     voice2_task = generate_voice(part2, voice2_path)
+    voice3_task = generate_voice(part3, voice3_path)
     image_prompt_task = generate_image_prompt(story, concept, topic)
-    _, _, image_prompt = await asyncio.gather(voice1_task, voice2_task, image_prompt_task)
+    _, _, _, image_prompt = await asyncio.gather(voice1_task, voice2_task, voice3_task, image_prompt_task)
     (story_dir / "image_prompt.txt").write_text(image_prompt, encoding="utf-8")
     print(f"   Промпт: {image_prompt[:80]}...\n")
 
@@ -506,17 +563,22 @@ async def main():
     print("7. Создание обложек...")
     cover1_path = str(story_dir / "cover_part1.png")
     cover2_path = str(story_dir / "cover_part2.png")
+    cover3_path = str(story_dir / "cover_part3.png")
     create_cover(image_path, title, 1, cover1_path)
     create_cover(image_path, title, 2, cover2_path)
+    create_cover(image_path, title, 3, cover3_path)
     print()
 
     print("8. Создание видео...")
     video1_path = str(story_dir / "video_part1.mp4")
     video2_path = str(story_dir / "video_part2.mp4")
+    video3_path = str(story_dir / "video_part3.mp4")
     effect1 = random.choice(EFFECTS)
     effect2 = random.choice(EFFECTS)
+    effect3 = random.choice(EFFECTS)
     create_video(image_path, voice1_path, video1_path, effect1)
     create_video(image_path, voice2_path, video2_path, effect2)
+    create_video(image_path, voice3_path, video3_path, effect3)
     print()
 
     print("=== Готово! ===")
