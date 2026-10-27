@@ -102,15 +102,25 @@ async def generate_story(topic: str) -> str:
 ТЕМА:
 {topic}
 
+КРИТИЧЕСКИ ВАЖНЫЕ ПРАВИЛА ФОРМАТИРОВАНИЯ:
+- НЕ добавляй никаких комментариев перед рассказом (никаких "Вот история", "Постарался сделать" и т.д.)
+- НЕ обрамляй текст звездочками, кавычками или другими символами
+- Выводи ТОЛЬКО текст рассказа, ничего больше
+- Начинай сразу с первой фразы рассказа
+
 СТИЛЬ ПОВЕСТВОВАНИЯ:
-- Пиши ПРОСТЫМ, РАЗГОВОРНЫМ языком, как будто рассказываешь другу
-- Пиши живо, эмоционально
+- Пиши СДЕРЖАННЫМ, СПОКОЙНЫМ тоном, как будто вспоминаешь прошлые события
+- Избегай сленга, жаргонизмов, восклицаний
+- НЕ используй фразы: "слушай", "ору", "реально очканул", "прикинь", "короче"
+- Пиши литературным языком, но простым и понятным
+- Пиши размеренно, с паузами, без суеты
 - Запрещено: "следует отметить", "необходимо упомянуть", "стоит добавить"
 
 ТРЕБОВАНИЯ:
 - ОКОЛО 550-650 слов
-- От ПЕРВОГО ЛИЦА
-- Естественный разговорный стиль
+- От ПЕРВОГО ЛИЦА (я, мне, мой)
+- Сдержанный, спокойный стиль повествования
+- Минимум деталей, максимум атмосферы
 
 Рассказ:"""
     return qwen_request(prompt, max_tokens=2400, temperature=0.85)
@@ -299,24 +309,36 @@ def create_cover(image_path: str, title: str, part_num: int, output_path: str):
     title_font = ImageFont.truetype(TITLE_FONT_PATH, 90)
     part_font = ImageFont.truetype(creepster_font, 64)
 
-    title_text = title.upper()
-    title_bbox = draw.textbbox((0, 0), title_text, font=title_font)
-    title_w = title_bbox[2] - title_bbox[0]
-    title_h = title_bbox[3] - title_bbox[1]
-    title_x = (img.width - title_w) // 2
-    title_y = (img.height // 2) - title_h - 20
+    # Разбиваем название на две строки если больше одного слова
+    title_words = title.upper().split()
+    if len(title_words) > 1:
+        mid = len(title_words) // 2
+        title_lines = [" ".join(title_words[:mid]), " ".join(title_words[mid:])]
+    else:
+        title_lines = [title.upper()]
 
-    for dx in range(-5, 6):
-        for dy in range(-5, 6):
-            draw.text((title_x + dx, title_y + dy), title_text, font=title_font, fill="black")
-    draw.text((title_x, title_y), title_text, font=title_font, fill=(220, 0, 0))
+    # Вычисляем позицию для центрирования
+    line_height = 100
+    total_title_height = line_height * len(title_lines)
+    title_y_start = (img.height // 2) - (total_title_height // 2) - 30
+
+    # Рисуем каждую строку названия
+    for i, line in enumerate(title_lines):
+        line_bbox = draw.textbbox((0, 0), line, font=title_font)
+        line_w = line_bbox[2] - line_bbox[0]
+        line_x = (img.width - line_w) // 2
+        line_y = title_y_start + i * line_height
+
+        for dx in range(-5, 6):
+            for dy in range(-5, 6):
+                draw.text((line_x + dx, line_y + dy), line, font=title_font, fill="black")
+        draw.text((line_x, line_y), line, font=title_font, fill=(220, 0, 0))
 
     part_text = f"Part {part_num}"
     part_bbox = draw.textbbox((0, 0), part_text, font=part_font)
     part_w = part_bbox[2] - part_bbox[0]
-    part_h = part_bbox[3] - part_bbox[1]
     part_x = (img.width - part_w) // 2
-    part_y = (img.height // 2) + 20
+    part_y = title_y_start + total_title_height + 20
 
     for dx in range(-4, 5):
         for dy in range(-4, 5):
