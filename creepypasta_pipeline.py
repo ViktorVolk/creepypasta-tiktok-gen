@@ -20,7 +20,7 @@ FFMPEG = os.getenv("FFMPEG_PATH", "ffmpeg")
 TITLE_FONT_PATH = os.getenv("TITLE_FONT_PATH", "C:/Windows/Fonts/arialbd.ttf")
 
 QWEN_API_KEY = os.getenv("QWEN_API_KEY")
-QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen3.8-flash")
+QWEN_MODEL = os.getenv("QWEN_MODEL", "deepseek-v4.1-flash")
 QWEN_ENDPOINT = "https://token-plan.maas.qwencloudapi.com/compatible-mode/v1/chat/completions"
 
 COMFYUI_URL = "http://127.0.0.1:8188"
@@ -132,7 +132,7 @@ async def generate_image_prompt(story: str, topic: str) -> str:
 Создай промпт для SDXL на английском языке (100-150 слов):
 - Опиши ГЛАВНОЕ МЕСТО действия из рассказа (дом, лес, больница и т.д.)
 - Опиши АТМОСФЕРУ (темнота, туман, заброшенность, жуткое освещение)
-- Опиши ГЛАВНЫЙ УЖАС/МОНСТРА/АНОМАЛИЮ, на фото оно должно выглядеть жутко и уродливо.
+- Опиши ГЛАВНЫЙ УЖАС/МОНСТРА/АНОМАЛИЮ, на фото оно должно выглядеть жутко и уродливо
 - Добавь детали: тени, силуэты, странные формы на заднем плане
 - Стиль: photorealistic, horror, cinematic lighting, dark atmosphere, eerie
 - ВАЖНО: вертикальная композиция (portrait orientation), объект съёмки в центре кадра
