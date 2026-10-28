@@ -72,6 +72,10 @@ class CreepypastaPipeline:
         print(f"   Часть 3: {len(part3.split())} слов\n")
 
         print("4. Параллельная генерация озвучки и промпта изображения...")
+        
+        if not part1.strip() or not part2.strip() or not part3.strip():
+            raise ValueError("Одна из частей рассказа пустая. Проверьте разделение текста.")
+        
         voice1_path = str(story_dir / "voice_part1.mp3")
         voice2_path = str(story_dir / "voice_part2.mp3")
         voice3_path = str(story_dir / "voice_part3.mp3")

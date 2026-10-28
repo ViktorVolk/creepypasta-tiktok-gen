@@ -45,7 +45,7 @@ class ImageGenerator:
             "7": {
                 "class_type": "CLIPTextEncode",
                 "inputs": {
-                    "text": "ugly, blurry, low quality, distorted, cartoon, anime, bright colors, happy, cheerful",
+                    "text": "beautiful, pretty, cute, aesthetic, pleasant, happy, cheerful, bright colors, cartoon, anime, watermark, text, signature, deformed hands, bad anatomy, oversaturated, overexposed, amateur, poorly lit, blurry, low quality",
                     "clip": ["4", 1]
                 }
             },
