@@ -30,7 +30,7 @@ IMG_HEIGHT = 1344
 EFFECTS = ["vhs_glitch", "film_grain", "static_noise", "scan_lines", "datamosh"]
 
 
-def qwen_request(prompt, max_tokens=400, temperature=0.85):
+def qwen_request(prompt, max_tokens=400, temperature=0.85, enable_thinking=True):
     headers = {
         "Authorization": f"Bearer {QWEN_API_KEY}",
         "Content-Type": "application/json"
@@ -39,12 +39,33 @@ def qwen_request(prompt, max_tokens=400, temperature=0.85):
         "model": QWEN_MODEL,
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": max_tokens,
-        "temperature": temperature
+        "temperature": temperature,
+        "enable_thinking": enable_thinking
     }
     response = requests.post(QWEN_ENDPOINT, headers=headers, json=payload)
     result = response.json()
+    
+    # Логируем полный ответ для отладки
+    print(f"   [DEBUG] API response: {result}")
+    
     if "choices" in result and len(result["choices"]) > 0:
-        return result["choices"][0]["message"]["content"].strip()
+        choice = result["choices"][0]
+        message = choice.get("message", {})
+        
+        # Пробуем разные варианты получения текста
+        content = message.get("content", "")
+        reasoning = message.get("reasoning_content", "")
+        
+        # Если content пустой, но есть reasoning - используем его
+        if not content and reasoning:
+            print(f"   [DEBUG] Using reasoning_content instead of content")
+            content = reasoning
+        
+        # Если всё ещё пусто - логируем и возвращаем пустую строку
+        if not content:
+            print(f"   [WARNING] Empty response from API. Full message: {message}")
+        
+        return content.strip()
     else:
         raise Exception(f"Qwen API error: {result}")
 
@@ -58,7 +79,7 @@ async def generate_topic() -> str:
 - НЕ пиши префикс "Тема:" в ответе
 
 Ответ (без префикса "Тема:"):"""
-    result = qwen_request(prompt, max_tokens=100, temperature=0.95)
+    result = qwen_request(prompt, max_tokens=100, temperature=0.95, enable_thinking=False)
     result = result.replace("Тема:", "").replace("тема:", "").strip()
     return result
 
@@ -77,7 +98,7 @@ async def generate_title(topic: str) -> str:
 - БЕЗ кавычек, без пояснений, ТОЛЬКО название
 
 Название:"""
-    result = qwen_request(prompt, max_tokens=20, temperature=0.9)
+    result = qwen_request(prompt, max_tokens=20, temperature=0.9, enable_thinking=False)
     
     # Очистка результата
     result = result.replace('"', '').replace("'", '').replace('«', '').replace('»', '').strip()
@@ -85,7 +106,7 @@ async def generate_title(topic: str) -> str:
     
     # Если пусто - используем тему
     if not result:
-        result = topic[:10]
+        result = topic[:30]
     
     return result
 
@@ -103,7 +124,7 @@ async def generate_hashtags(topic: str) -> str:
 - ТОЛЬКО хештеги, без пояснений
 
 Хештеги:"""
-    return qwen_request(prompt, max_tokens=200, temperature=0.7)
+    return qwen_request(prompt, max_tokens=200, temperature=0.7, enable_thinking=False)
 
 
 async def generate_story(topic: str) -> str:
@@ -133,7 +154,7 @@ async def generate_story(topic: str) -> str:
 - Минимум деталей, максимум атмосферы
 
 Рассказ:"""
-    return qwen_request(prompt, max_tokens=2400, temperature=0.85)
+    return qwen_request(prompt, max_tokens=2400, temperature=0.85, enable_thinking=False)
 
 
 async def generate_voice(text: str, output_file: str):
@@ -144,21 +165,21 @@ async def generate_voice(text: str, output_file: str):
 
 
 async def generate_image_prompt(story: str, topic: str) -> str:
-    prompt = f"""Создай описание для генерации изображения по теме рассказа.
+    prompt = f"""Создай описание для генерации изображения которое будет обложкой рассказа.
 
 РАССКАЗ:
 {story}
 
-Создай промпт для SDXL на английском языке (50 слов):
+Создай промпт для SDXL на английском языке (100-150 слов):
 - Опиши ГЛАВНОЕ МЕСТО действия из рассказа (дом, лес, больница и т.д.)
 - Опиши АТМОСФЕРУ (темнота, туман, заброшенность, жуткое освещение)
-- Опиши ГЛАВНЫЙ УЖАС/МОНСТРА/АНОМАЛИЮ, на фото оно должно выглядеть жутко и уродливо
+- Опиши ГЛАВНЫЙ УЖАС/МОНСТРА/АНОМАЛИЮ, на фото оно должно выглядеть жутко и уродливо и быть на переднем плане.
 - Добавь детали: тени, силуэты, странные формы на заднем плане
-- Стиль: photorealistic, horror, cinematic lighting, dark atmosphere, eerie
-- ВАЖНО: вертикальная композиция (portrait orientation), объект съёмки в центре кадра
+- Стиль: horror, cinematic lighting, dark atmosphere, eerie
+- ВАЖНО: вертикальная композиция (portrait orientation), объект съёмки (главный ужас) в центре кадра
 
 Промпт на английском:"""
-    return qwen_request(prompt, max_tokens=300, temperature=0.7)
+    return qwen_request(prompt, max_tokens=300, temperature=0.7, enable_thinking=False)
 
 
 async def generate_image(prompt: str, output_dir: Path) -> str:
@@ -316,7 +337,7 @@ def create_cover(image_path: str, title: str, part_num: int, output_path: str):
 
     creepster_font = str(FONTS_DIR / "Creepster-Regular.ttf")
     
-    title_font = ImageFont.truetype(TITLE_FONT_PATH, 90)
+    title_font = ImageFont.truetype(TITLE_FONT_PATH, 72)
     part_font = ImageFont.truetype(creepster_font, 64)
 
     # Разбиваем название на две строки если больше одного слова
@@ -328,7 +349,7 @@ def create_cover(image_path: str, title: str, part_num: int, output_path: str):
         title_lines = [title.upper()]
 
     # Вычисляем позицию для центрирования
-    line_height = 100
+    line_height = 80
     total_title_height = line_height * len(title_lines)
     title_y_start = (img.height // 2) - (total_title_height // 2) - 30
 
