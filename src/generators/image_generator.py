@@ -31,10 +31,10 @@ class ImageGenerator:
                 "class_type": "KSampler",
                 "inputs": {
                     "seed": random.randint(0, 2**32 - 1),
-                    "steps": 20,
-                    "cfg": 7.5,
-                    "sampler_name": "euler",
-                    "scheduler": "normal",
+                    "steps": 28,
+                    "cfg": 8.5,
+                    "sampler_name": "dpmpp_2m",
+                    "scheduler": "karras",
                     "denoise": 1.0,
                     "model": ["4", 0],
                     "positive": ["3", 0],
@@ -45,7 +45,7 @@ class ImageGenerator:
             "7": {
                 "class_type": "CLIPTextEncode",
                 "inputs": {
-                    "text": "beautiful, pretty, cute, aesthetic, pleasant, happy, cheerful, bright colors, cartoon, anime, watermark, text, signature, deformed hands, bad anatomy, oversaturated, overexposed, amateur, poorly lit, blurry, low quality",
+                    "text": "beautiful, pretty, cute, pleasant, happy, cheerful, bright colors, cartoon, anime, watermark, text, signature, jpeg artifacts, noise, grainy, out of focus, blurry, low quality, cropped, cut off, duplicate, error, oversaturated, overexposed, amateur, poorly lit",
                     "clip": ["4", 1]
                 }
             },
