@@ -21,7 +21,7 @@ class ImageGenerator:
             },
             "4": {
                 "class_type": "CheckpointLoaderSimple",
-                "inputs": {"ckpt_name": "juggernautXL_v8Rundiffusion.safetensors"}
+                "inputs": {"ckpt_name": "playground-v2.5-1024px-aesthetic.fp16.safetensors"}
             },
             "5": {
                 "class_type": "EmptyLatentImage",

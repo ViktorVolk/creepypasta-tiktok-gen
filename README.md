@@ -6,7 +6,7 @@
 
 - **Текст**: Qwen Studio API (генерация концепции, рассказа, названия, хештегов)
 - **Голос**: Edge TTS (бесплатно, локально)
-- **Изображения**: ComfyUI + SDXL (локально, RTX 5070)
+- **Изображения**: ComfyUI + Playground v2.5 (локально, RTX 5070)
 - **Видео**: ffmpeg с эффектами помех и фоновой музыкой
 - **Обложки**: Pillow + шрифт Creepster
 
@@ -38,8 +38,8 @@ cd ComfyUI
 pip install -r requirements.txt
 ```
 
-Скачать модель SDXL в `ComfyUI/models/checkpoints/`:
-- [JuggernautXL v8](https://huggingface.co/RunDiffusion/Juggernaut-XL-v8)
+Скачать модель в `ComfyUI/models/checkpoints/`:
+- [Playground v2.5](https://huggingface.co/playgroundai/playground-v2.5-1024px-aesthetic)
 
 ### 5. Настроить .env
 Скопировать `.env.example` в `.env` и заполнить:
@@ -207,7 +207,6 @@ python scripts/test_stage5_cover.py image.png "Название" 1 cover.png
 ## Требования
 
 - Python 3.10+
-- PyTorch 2.15.0+ (для RTX 5070 нужна версия с CUDA 13.0+)
 - ComfyUI
 - ffmpeg
 - Qwen Studio API ключ
