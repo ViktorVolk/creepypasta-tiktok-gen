@@ -71,7 +71,16 @@ class CreepypastaPipeline:
         print(f"   Часть 2: {len(part2.split())} слов")
         print(f"   Часть 3: {len(part3.split())} слов\n")
 
-        print("4. Параллельная генерация озвучки и промпта изображения...")
+        print("4. Генерация промпта изображения...")
+        image_prompt = self.text_gen.generate_image_prompt(story, topic)
+        self.file_mgr.save_text_file(story_dir, "image_prompt.txt", image_prompt)
+        print(f"   Промпт: {image_prompt[:80]}...\n")
+
+        print("5. Генерация изображения...")
+        image_path = await self.image_gen.generate(image_prompt, story_dir)
+        print(f"   Изображение: {image_path}\n")
+
+        print("6. Генерация озвучки (последовательно)...")
         
         if not part1.strip() or not part2.strip() or not part3.strip():
             raise ValueError("Одна из частей рассказа пустая. Проверьте разделение текста.")
@@ -80,22 +89,18 @@ class CreepypastaPipeline:
         voice2_path = str(story_dir / "voice_part2.mp3")
         voice3_path = str(story_dir / "voice_part3.mp3")
         
-        voice1_task = self.voice_gen.generate(part1, voice1_path)
-        voice2_task = self.voice_gen.generate(part2, voice2_path)
-        voice3_task = self.voice_gen.generate(part3, voice3_path)
-        image_prompt_task = asyncio.to_thread(self.text_gen.generate_image_prompt, story, topic)
+        await self.voice_gen.generate(part1, voice1_path)
+        print("   Часть 1 озвучена")
         
-        _, _, _, image_prompt = await asyncio.gather(
-            voice1_task, voice2_task, voice3_task, image_prompt_task
-        )
-        self.file_mgr.save_text_file(story_dir, "image_prompt.txt", image_prompt)
-        print(f"   Промпт: {image_prompt[:80]}...\n")
+        await asyncio.sleep(3)
+        await self.voice_gen.generate(part2, voice2_path)
+        print("   Часть 2 озвучена")
+        
+        await asyncio.sleep(3)
+        await self.voice_gen.generate(part3, voice3_path)
+        print("   Часть 3 озвучена\n")
 
-        print("5. Генерация изображения...")
-        image_path = await self.image_gen.generate(image_prompt, story_dir)
-        print(f"   Изображение: {image_path}\n")
-
-        print("6. Создание обложек...")
+        print("7. Создание обложек...")
         cover1_path = str(story_dir / "cover_part1.png")
         cover2_path = str(story_dir / "cover_part2.png")
         cover3_path = str(story_dir / "cover_part3.png")
@@ -105,7 +110,7 @@ class CreepypastaPipeline:
         self.cover_gen.create(image_path, title, 3, cover3_path)
         print()
 
-        print("7. Создание видео...")
+        print("8. Создание видео...")
         video1_path = str(story_dir / "video_part1.mp4")
         video2_path = str(story_dir / "video_part2.mp4")
         video3_path = str(story_dir / "video_part3.mp4")
