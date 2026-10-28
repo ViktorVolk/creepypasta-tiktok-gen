@@ -66,21 +66,47 @@ TITLE_FONT_PATH=C:/Windows/Fonts/arialbd.ttf
 python ComfyUI\main.py --listen
 ```
 
+### Проверка компонентов
+```bash
+python scripts/check_components.py
+```
+
 ### Генерация контента
 
 **Вариант 1: Автоматическая тема**
 ```bash
-python creepypasta_pipeline.py
+python main.py
 ```
 
 **Вариант 2: С указанием темы**
 ```bash
-python creepypasta_pipeline.py "заброшенная больница"
+python main.py "заброшенная больница"
 ```
 
 **Вариант 3: С детальными пожеланиями**
 ```bash
-python creepypasta_pipeline.py "история про подростка 15 лет, деревня у бабушки, старый радиоприемник"
+python main.py "история про подростка 15 лет, деревня у бабушки, старый радиоприемник"
+```
+
+### Тестирование отдельных этапов
+
+Каждый этап можно тестировать отдельно:
+
+```bash
+# Этап 1: Генерация текста
+python scripts/test_stage1_text.py "заброшенная больница"
+
+# Этап 2: Генерация голоса
+python scripts/test_stage2_voice.py "Текст для озвучки"
+
+# Этап 3: Генерация изображения (требует запущенный ComfyUI)
+python scripts/test_stage3_image.py "dark horror house, fog, night"
+
+# Этап 4: Генерация видео
+python scripts/test_stage4_video.py image.png audio.mp3 output.mp4 vhs_glitch
+
+# Этап 5: Создание обложек
+python scripts/test_stage5_cover.py image.png "Название" 1 cover.png
 ```
 
 ## Что генерируется
@@ -126,16 +152,36 @@ python creepypasta_pipeline.py "история про подростка 15 ле
 
 ```
 .
-├── creepypasta_pipeline.py  # Основной скрипт
-├── requirements.txt         # Python зависимости
-├── .env                     # Секреты (не в git)
-├── .env.example            # Шаблон .env
-├── .gitignore              # Игнор для git
-├── README.md               # Документация
-├── fonts/                  # Шрифты
+├── main.py                      # Точка входа (запуск пайплайна)
+├── requirements.txt             # Python зависимости
+├── .env                         # Секреты (не в git)
+├── .env.example                 # Шаблон .env
+├── .gitignore                   # Игнор для git
+├── README.md                    # Документация
+├── src/                         # Исходный код
+│   ├── config.py                # Конфигурация (env vars, constants)
+│   ├── prompts.py               # Промпты для Qwen API
+│   ├── pipeline.py              # Главный класс CreepypastaPipeline
+│   ├── generators/              # Генераторы контента
+│   │   ├── text_generator.py    # Qwen API (текст)
+│   │   ├── voice_generator.py   # Edge TTS (голос)
+│   │   ├── image_generator.py   # ComfyUI (изображения)
+│   │   ├── video_generator.py   # ffmpeg (видео)
+│   │   └── cover_generator.py   # Pillow (обложки)
+│   └── utils/                   # Утилиты
+│       ├── story_splitter.py    # Разделение рассказа на части
+│       └── file_manager.py      # Управление файлами
+├── scripts/                     # Тестовые скрипты
+│   ├── check_components.py      # Проверка живучести компонентов
+│   ├── test_stage1_text.py      # Тест генерации текста
+│   ├── test_stage2_voice.py     # Тест генерации голоса
+│   ├── test_stage3_image.py     # Тест генерации изображения
+│   ├── test_stage4_video.py     # Тест генерации видео
+│   └── test_stage5_cover.py     # Тест создания обложек
+├── fonts/                       # Шрифты
 │   └── Creepster-Regular.ttf
-├── music/                  # Фоновая музыка (MP3)
-└── stories/                # Сгенерированный контент (не в git)
+├── music/                       # Фоновая музыка (MP3)
+└── stories/                     # Сгенерированный контент (не в git)
     └── 001_название/
         ├── title.txt
         ├── hashtags_part1.txt
